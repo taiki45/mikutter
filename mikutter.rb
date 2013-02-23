@@ -1,4 +1,4 @@
-#! /usr/bin/ruby
+#!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 =begin rdoc
 = mikutter - the moest twitter client
