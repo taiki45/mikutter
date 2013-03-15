@@ -77,6 +77,7 @@ class Gdk::MiraclePainter < Gtk::Object
     @p_message = message
     @message = message.to_message
     @selected = false
+    @pixbuf = nil
     type_strict @message => Message
     super()
     coordinator(*coodinate)
@@ -113,7 +114,16 @@ class Gdk::MiraclePainter < Gtk::Object
 
   # TLに表示するための Gdk::Pixbuf のインスタンスを返す
   def pixbuf
-    @pixbuf ||= gen_pixbuf
+    return @pixbuf if @pixbuf
+    if visible?
+      @pixbuf = gen_pixbuf
+      if(defined? @last_modify_height and @last_modify_height != @pixbuf.height)
+        tree.get_column(0).queue_resize
+        @last_modify_height = @pixbuf.height end
+      @pixbuf
+    else
+      @last_modify_height = height
+      Gdk::WebImageLoader.loading_pixbuf(@last_modify_height, @last_modify_height) end
   end
 
   # MiraclePainterの座標x, y上でポインティングデバイスのボタン1が押されたことを通知する
@@ -226,13 +236,11 @@ class Gdk::MiraclePainter < Gtk::Object
 
   # 更新イベントを発生させる
   def on_modify(event=true)
+    @modify_source = caller(1)
     if not destroyed?
       @pixmap = nil
       @pixbuf = nil
       @coordinate = nil
-      if(defined? @last_modify_height and @last_modify_height != height)
-        tree.get_column(0).queue_resize
-        @last_modify_height = height end
       signal_emit('modified') if event
     end
   end
@@ -240,15 +248,9 @@ class Gdk::MiraclePainter < Gtk::Object
   # 画面上にこれが表示されているかを返す
   def visible?
     if tree
-      start, last = tree.visible_range
-      if start
-        range = tree.selected_range_byorder
-        if(tree.vadjustment.value == 0)
-          range.first <= @tree.get_order(message)
-        else
-          range.include?(@tree.get_order(message)) end end
-    else
-      true end end
+      range = tree.visible_range
+      if range and 2 == range.size
+        Range.new(*range).cover?(tree.get_path_by_message(@message)) end end end
 
   def destroy
     def self.tree
@@ -362,8 +364,7 @@ class Gdk::MiraclePainter < Gtk::Object
     render_background context
     render_main_icon context
     render_main_text context
-    render_parts context
-  end
+    render_parts context end
 
   def render_background(context)
     context.save{
