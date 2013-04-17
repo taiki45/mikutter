@@ -11,12 +11,14 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 =end
+mikutter_directory = File.expand_path(File.dirname(__FILE__))
 
-# if File.symlink?($0)
-#   Dir.chdir(File.join(File.dirname(File.readlink($0)), 'core'))
-# else
-#   Dir.chdir(File.join(File.dirname($0), 'core'))
-# end
+begin
+  ENV['BUNDLE_GEMFILE'] = File.expand_path(File.join(File.dirname($0), "Gemfile"))
+  require 'bundler/setup'
+rescue LoadError, SystemExit
+  ENV['GEM_HOME'] = File.join(mikutter_directory, 'vendor/bundle/ruby/' + RUBY_VERSION + '/')
+end
 
 Thread.abort_on_exception = true
 ENV['LIBOVERLAY_SCROLLBAR'] = '0'
@@ -26,11 +28,12 @@ require 'webrick'
 require 'thread'
 require 'fileutils'
 
-require File.expand_path(File.join(File.dirname(__FILE__), 'core/boot/option'))
-require File.expand_path(File.join(File.dirname(__FILE__), 'core/utils'))
+require File.expand_path(File.join(mikutter_directory, 'core/boot/option'))
+require File.expand_path(File.join(mikutter_directory, 'core/utils'))
 
 miquire :boot, 'check_config_permission', 'mainloop'
-miquire :core, 'service'
+miquire :core, 'service', 'environment'
+Dir.chdir(Environment::CONFROOT)
 miquire :boot, 'load_plugin'
 
 notice "fire boot event"

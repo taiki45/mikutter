@@ -8,6 +8,10 @@ require 'cairo'
 class Gdk::SubPartsRetweet < Gdk::SubPartsVoter
   regist
 
+  def get_vote_count
+    [helper.message[:retweet_count] || 0, super].max
+  end
+
   def get_default_votes
     helper.message.retweeted_by
   end
@@ -18,7 +22,7 @@ class Gdk::SubPartsRetweet < Gdk::SubPartsVoter
   def name
     :retweeted end
 
-  Plugin.create(:core) do
+  Plugin.create(:sub_parts_retweet) do
     on_retweet do |retweets|
       retweets.deach{ |retweet|
         Gdk::MiraclePainter.findbymessage_d(retweet.retweet_source(true)).next{ |mps|

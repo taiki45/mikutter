@@ -41,8 +41,4 @@ class TC_Miquire < Test::Unit::TestCase
     miquire :allfiles
   end
 
-  # must "enum plugins" do
-  #   Miquire::Plugin.loadpath << 'addon/'
-  # end
-
 end

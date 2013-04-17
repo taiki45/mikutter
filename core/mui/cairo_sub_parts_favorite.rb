@@ -8,6 +8,10 @@ require 'cairo'
 class Gdk::SubPartsFavorite < Gdk::SubPartsVoter
   regist
 
+  def get_vote_count
+    [helper.message[:favorite_count] || 0, super].max
+  end
+
   def get_default_votes
     helper.message.favorited_by
   end
@@ -19,7 +23,7 @@ class Gdk::SubPartsFavorite < Gdk::SubPartsVoter
     :favorited end
 
   Delayer.new{
-    Plugin.create(:core) do
+    Plugin.create(:sub_parts_favorite) do
       onfavorite do |service, user, message|
         Gdk::MiraclePainter.findbymessage_d(message).next{ |mps|
           mps.deach{ |mp|
