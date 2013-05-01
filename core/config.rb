@@ -34,13 +34,16 @@ module CHIConfig
   # キャッシュディレクトリ
   CACHE = File.join(CONFROOT, 'cache')
 
+  # プラグインディレクトリ
+  PLUGIN_PATH = File.expand_path(File.join(File.dirname(__FILE__), "plugin"))
+
   # AutoTag有効？
   AutoTag = false
 
   # 再起動後に、前回取得したポストを取得しない
   NeverRetrieveOverlappedMumble = false
 
-  REVISION = 1201
+  REVISION = 1211
 
   # このソフトのバージョン。
   VERSION = [0,2,2,REVISION]
